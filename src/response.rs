@@ -26,5 +26,5 @@ pub struct NftInfoResponse {
 
 #[cw_serde]
 pub struct TokensResponse {
-    pub tokens: Vec<Token>
+    pub tokens: Vec<Token>,
 }
