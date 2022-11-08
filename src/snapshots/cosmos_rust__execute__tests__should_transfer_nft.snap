@@ -1,0 +1,9 @@
+---
+source: src/execute.rs
+expression: "contract.tokens.load(&deps.storage, TOKEN_ID).unwrap()"
+---
+{
+  "owner": "stranger",
+  "token_id": "1",
+  "token_uri": null
+}

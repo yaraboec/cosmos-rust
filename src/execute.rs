@@ -78,7 +78,9 @@ impl<'a> Contract<'a> {
                 None => Ok(token),
             })?;
 
-        return Ok(Response::new().add_attribute("action", "mint"));
+        return Ok(Response::new()
+            .add_attribute("action", "mint")
+            .add_attribute("token_id", msg.token_id));
     }
 
     pub fn send_nft(
@@ -134,5 +136,148 @@ impl<'a> Contract<'a> {
         self.tokens.save(deps.storage, token_id, &token)?;
 
         return Ok(token);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use cosmwasm_std::{
+        testing::{MockApi, MockQuerier},
+        Env, MemoryStorage, OwnedDeps, Response, to_binary,
+    };
+
+    use crate::{
+        msg::{ExecuteMsg, TokenMsg},
+        state::Contract,
+        utils::test_utils::{get_mock_info, initialized_contract, MINTER, OWNER},
+        ContractError,
+    };
+
+    const STRANGER: &str = "stranger";
+    const TOKEN_ID: &str = "1";
+
+    #[test]
+    fn should_fail_mint_when_called_not_by_minter() {
+        let (mut deps, contract, env, _) = initialized_contract();
+
+        let mint_res = mint_token(&contract, &mut deps, env, STRANGER, TOKEN_ID).unwrap_err();
+
+        assert!(matches!(mint_res, ContractError::Unauthorized {}));
+    }
+
+    #[test]
+    fn should_mint_token() {
+        let (mut deps, contract, env, _) = initialized_contract();
+
+        let mint_res = mint_token(&contract, &mut deps, env, MINTER, TOKEN_ID).unwrap();
+
+        assert_eq!(mint_res.messages.len(), 0);
+        insta::assert_json_snapshot!(contract.tokens.load(&deps.storage, TOKEN_ID).unwrap());
+    }
+
+    #[test]
+    fn should_fail_nft_transfer_when_called_not_by_owner() {
+        let (mut deps, contract, env, _) = initialized_contract();
+        mint_token(&contract, &mut deps, env.clone(), MINTER, TOKEN_ID).unwrap();
+
+        let transfer_result = contract
+            .execute(
+                deps.as_mut(),
+                env,
+                get_mock_info(STRANGER),
+                ExecuteMsg::TransferNft {
+                    token_id: TOKEN_ID.to_string(),
+                    to: STRANGER.to_string(),
+                },
+            )
+            .unwrap_err();
+
+        assert!(matches!(transfer_result, ContractError::Unauthorized {}))
+    }
+
+    #[test]
+    fn should_transfer_nft() {
+        let (mut deps, contract, env, _) = initialized_contract();
+        mint_token(&contract, &mut deps, env.clone(), MINTER, TOKEN_ID).unwrap();
+
+        let transfer_result = contract
+            .execute(
+                deps.as_mut(),
+                env,
+                get_mock_info(OWNER),
+                ExecuteMsg::TransferNft {
+                    token_id: TOKEN_ID.to_string(),
+                    to: STRANGER.to_string(),
+                },
+            )
+            .unwrap();
+
+        assert_eq!(transfer_result.messages.len(), 0);
+        insta::assert_json_snapshot!(contract.tokens.load(&deps.storage, TOKEN_ID).unwrap());
+    }
+
+    #[test]
+    fn should_fail_nft_send_when_called_not_by_owner() {
+        let (mut deps, contract, env, _) = initialized_contract();
+        mint_token(&contract, &mut deps, env.clone(), MINTER, TOKEN_ID).unwrap();
+
+        let send_result = contract
+            .execute(
+                deps.as_mut(),
+                env,
+                get_mock_info(STRANGER),
+                ExecuteMsg::SendNft {
+                    token_id: TOKEN_ID.to_string(),
+                    contract: STRANGER.to_string(),
+                    msg: to_binary("Hello, it's fail!").unwrap(),
+                },
+            )
+            .unwrap_err();
+
+        assert!(matches!(send_result, ContractError::Unauthorized {}))
+    }
+
+    #[test]
+    fn should_send_nft() {
+        let (mut deps, contract, env, _) = initialized_contract();
+        mint_token(&contract, &mut deps, env.clone(), MINTER, TOKEN_ID).unwrap();
+
+        let send_result = contract
+            .execute(
+                deps.as_mut(),
+                env,
+                get_mock_info(OWNER),
+                ExecuteMsg::SendNft {
+                    token_id: TOKEN_ID.to_string(),
+                    contract: STRANGER.to_string(),
+                    msg: to_binary("Hello, it's success!").unwrap(),
+                },
+            )
+            .unwrap();
+
+        insta::assert_json_snapshot!(send_result.messages[0].msg);
+        insta::assert_json_snapshot!(contract.tokens.load(&deps.storage, TOKEN_ID).unwrap());
+    }
+
+    fn mint_token(
+        contract: &Contract,
+        deps: &mut OwnedDeps<MemoryStorage, MockApi, MockQuerier>,
+        env: Env,
+        caller: &str,
+        token_id: &str,
+    ) -> Result<Response, ContractError> {
+        let token_msg = get_default_token_msg(token_id);
+
+        contract.execute(deps.as_mut(), env, get_mock_info(caller), token_msg.clone())
+    }
+
+    fn get_default_token_msg(token_id: &str) -> ExecuteMsg {
+        ExecuteMsg::Mint {
+            token: TokenMsg {
+                owner: OWNER.to_string(),
+                token_id: token_id.to_string(),
+                token_uri: None,
+            },
+        }
     }
 }

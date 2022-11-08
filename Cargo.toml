@@ -48,7 +48,8 @@ cw2 = "0.15.1"
 cw721 = "0.16.0"
 schemars = "0.8.10"
 serde = { version = "1.0.145", default-features = false, features = ["derive"] }
-thiserror = { version = "1.0.31" }
+thiserror = { version = "1.0.37" }
 
 [dev-dependencies]
 cw-multi-test = "0.15.1"
+insta = { version = "1.21.0", features = ["json"] }

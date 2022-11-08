@@ -98,3 +98,7 @@ impl<'a> Contract<'a> {
         Ok(TokensResponse { tokens: tokens? })
     }
 }
+
+#[cfg(test)]
+mod tests {
+}

@@ -1,0 +1,13 @@
+---
+source: src/execute.rs
+expression: "send_result.messages[0].msg"
+---
+{
+  "wasm": {
+    "execute": {
+      "contract_addr": "stranger",
+      "msg": "eyJyZWNlaXZlX25mdCI6eyJzZW5kZXIiOiJvd25lciIsInRva2VuX2lkIjoiMSIsIm1zZyI6IklraGxiR3h2TENCcGRDZHpJSE4xWTJObGMzTWhJZz09In19",
+      "funds": []
+    }
+  }
+}
