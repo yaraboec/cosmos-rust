@@ -1,0 +1,23 @@
+---
+source: src/query.rs
+expression: res
+---
+{
+  "tokens": [
+    {
+      "owner": "owner",
+      "token_id": "1",
+      "token_uri": null
+    },
+    {
+      "owner": "owner",
+      "token_id": "2",
+      "token_uri": null
+    },
+    {
+      "owner": "owner",
+      "token_id": "3",
+      "token_uri": null
+    }
+  ]
+}

@@ -141,20 +141,15 @@ impl<'a> Contract<'a> {
 
 #[cfg(test)]
 mod tests {
-    use cosmwasm_std::{
-        testing::{MockApi, MockQuerier},
-        Env, MemoryStorage, OwnedDeps, Response, to_binary,
-    };
+    use cosmwasm_std::to_binary;
 
     use crate::{
-        msg::{ExecuteMsg, TokenMsg},
-        state::Contract,
-        utils::test_utils::{get_mock_info, initialized_contract, MINTER, OWNER},
+        msg::ExecuteMsg,
+        utils::test_utils::{get_mock_info, initialized_contract, mint_token, MINTER, OWNER, TOKEN_ID},
         ContractError,
     };
 
     const STRANGER: &str = "stranger";
-    const TOKEN_ID: &str = "1";
 
     #[test]
     fn should_fail_mint_when_called_not_by_minter() {
@@ -257,27 +252,5 @@ mod tests {
 
         insta::assert_json_snapshot!(send_result.messages[0].msg);
         insta::assert_json_snapshot!(contract.tokens.load(&deps.storage, TOKEN_ID).unwrap());
-    }
-
-    fn mint_token(
-        contract: &Contract,
-        deps: &mut OwnedDeps<MemoryStorage, MockApi, MockQuerier>,
-        env: Env,
-        caller: &str,
-        token_id: &str,
-    ) -> Result<Response, ContractError> {
-        let token_msg = get_default_token_msg(token_id);
-
-        contract.execute(deps.as_mut(), env, get_mock_info(caller), token_msg.clone())
-    }
-
-    fn get_default_token_msg(token_id: &str) -> ExecuteMsg {
-        ExecuteMsg::Mint {
-            token: TokenMsg {
-                owner: OWNER.to_string(),
-                token_id: token_id.to_string(),
-                token_uri: None,
-            },
-        }
     }
 }

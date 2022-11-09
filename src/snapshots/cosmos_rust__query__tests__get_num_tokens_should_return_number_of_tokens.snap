@@ -1,0 +1,7 @@
+---
+source: src/query.rs
+expression: res
+---
+{
+  "number": 1
+}

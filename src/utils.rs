@@ -4,12 +4,13 @@ pub mod test_utils {
         Env, MemoryStorage, OwnedDeps, Response, MessageInfo,
     };
 
-    use crate::{msg::InstantiateMsg, state::Contract};
+    use crate::{msg::{InstantiateMsg, ExecuteMsg, TokenMsg}, state::Contract, ContractError};
 
     pub const MINTER: &str = "minter";
     pub const NAME: &str = "my_contract";
     pub const SYMBOL: &str = "my_symbol";
     pub const OWNER: &str = "owner";
+    pub const TOKEN_ID: &str = "1";
 
     pub fn initialized_contract() -> (
         OwnedDeps<MemoryStorage, MockApi, MockQuerier>,
@@ -37,5 +38,27 @@ pub mod test_utils {
 
     pub fn get_mock_info(sender: &str) -> MessageInfo {
         mock_info(sender, &[])
+    }
+
+    pub fn mint_token(
+        contract: &Contract,
+        deps: &mut OwnedDeps<MemoryStorage, MockApi, MockQuerier>,
+        env: Env,
+        caller: &str,
+        token_id: &str,
+    ) -> Result<Response, ContractError> {
+        let token_msg = get_default_token_msg(token_id);
+
+        contract.execute(deps.as_mut(), env, get_mock_info(caller), token_msg.clone())
+    }
+
+    pub fn get_default_token_msg(token_id: &str) -> ExecuteMsg {
+        ExecuteMsg::Mint {
+            token: TokenMsg {
+                owner: OWNER.to_string(),
+                token_id: token_id.to_string(),
+                token_uri: None,
+            },
+        }
     }
 }

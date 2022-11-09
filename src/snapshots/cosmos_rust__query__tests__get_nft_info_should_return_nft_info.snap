@@ -1,0 +1,7 @@
+---
+source: src/query.rs
+expression: res
+---
+{
+  "token_uri": null
+}
