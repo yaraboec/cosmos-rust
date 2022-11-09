@@ -1,0 +1,29 @@
+---
+source: src/integration_tests.rs
+expression: send_res.events.last()
+---
+{
+  "type": "wasm",
+  "attributes": [
+    {
+      "key": "_contract_addr",
+      "value": "contract1"
+    },
+    {
+      "key": "action",
+      "value": "receive"
+    },
+    {
+      "key": "sender",
+      "value": "owner"
+    },
+    {
+      "key": "token_id",
+      "value": "1"
+    },
+    {
+      "key": "msg",
+      "value": "Hello from first"
+    }
+  ]
+}

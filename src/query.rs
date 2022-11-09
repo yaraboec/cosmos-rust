@@ -108,12 +108,12 @@ mod tests {
 
     use crate::{
         state::Contract,
-        utils::test_utils::{initialized_contract, mint_token, MINTER, OWNER, TOKEN_ID},
+        utils::test_utils::{initialize_contract, mint_token, MINTER, OWNER, TOKEN_ID},
     };
 
     #[test]
     fn get_contract_info_should_return_contract_info() {
-        let (deps, contract, ..) = initialized_contract();
+        let (deps, contract, ..) = initialize_contract();
 
         let res = contract.get_contract_info(deps.as_ref()).unwrap();
 
@@ -122,7 +122,7 @@ mod tests {
 
     #[test]
     fn get_nft_info_should_return_nft_info() {
-        let (mut deps, contract, env, ..) = initialized_contract();
+        let (mut deps, contract, env, ..) = initialize_contract();
         mint_token(&contract, &mut deps, env.clone(), MINTER, TOKEN_ID).unwrap();
 
         let res = contract
@@ -134,7 +134,7 @@ mod tests {
 
     #[test]
     fn get_num_tokens_should_return_number_of_tokens() {
-        let (mut deps, contract, env, ..) = initialized_contract();
+        let (mut deps, contract, env, ..) = initialize_contract();
         mint_token(&contract, &mut deps, env.clone(), MINTER, TOKEN_ID).unwrap();
 
         let res = contract.get_num_tokens(deps.as_ref()).unwrap();
@@ -144,7 +144,7 @@ mod tests {
 
     #[test]
     fn get_owner_of_token_should_return_owner_of_token() {
-        let (mut deps, contract, env, ..) = initialized_contract();
+        let (mut deps, contract, env, ..) = initialize_contract();
         mint_token(&contract, &mut deps, env.clone(), MINTER, TOKEN_ID).unwrap();
 
         let res = contract
@@ -156,7 +156,7 @@ mod tests {
 
     #[test]
     fn get_owner_tokens_should_return_owner_tokens() {
-        let (mut deps, contract, env, ..) = initialized_contract();
+        let (mut deps, contract, env, ..) = initialize_contract();
         mint_multiple_tokens(&contract, &mut deps, env.clone());
 
         let res = contract
@@ -168,7 +168,7 @@ mod tests {
 
     #[test]
     fn get_all_tokens_should_return_all_tokens() {
-        let (mut deps, contract, env, ..) = initialized_contract();
+        let (mut deps, contract, env, ..) = initialize_contract();
         mint_multiple_tokens(&contract, &mut deps, env.clone());
 
         let res = contract.get_all_tokens(deps.as_ref(), None, None).unwrap();
@@ -178,7 +178,7 @@ mod tests {
 
     #[test]
     fn get_all_tokens_should_return_all_tokens_started_after_some_token() {
-        let (mut deps, contract, env, ..) = initialized_contract();
+        let (mut deps, contract, env, ..) = initialize_contract();
         mint_multiple_tokens(&contract, &mut deps, env.clone());
 
         let res = contract
@@ -190,7 +190,7 @@ mod tests {
 
     #[test]
     fn get_all_tokens_should_return_all_tokens_with_some_limit() {
-        let (mut deps, contract, env, ..) = initialized_contract();
+        let (mut deps, contract, env, ..) = initialize_contract();
         mint_multiple_tokens(&contract, &mut deps, env.clone());
 
         let res = contract

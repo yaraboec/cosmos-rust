@@ -3,6 +3,7 @@ use crate::response::{
 };
 use cosmwasm_schema::{cw_serde, QueryResponses};
 use cosmwasm_std::Binary;
+use cw721::Cw721ReceiveMsg;
 
 #[cw_serde]
 pub struct InstantiateMsg {
@@ -25,6 +26,7 @@ pub enum ExecuteMsg {
         contract: String,
         msg: Binary,
     },
+    ReceiveNft(Cw721ReceiveMsg),
 }
 
 #[cw_serde]

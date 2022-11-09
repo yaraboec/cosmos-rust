@@ -7,6 +7,7 @@ use crate::response::ContractInfoResponse;
 
 pub const CONTRACT_NAME: &str = "contract228";
 pub const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
+pub const TOKENS_PK: &str = "tokens_key";
 
 pub struct Contract<'a> {
     pub owner: Item<'a, Addr>,
@@ -37,18 +38,14 @@ impl<'a> IndexList<Token> for TokenIndex<'_> {
 impl<'a> Contract<'a> {
     pub fn get_contract() -> Self {
         let indexes = TokenIndex {
-            owner: MultiIndex::new(idx_fn, "tokens_key", "tokens_owner_key"),
+            owner: MultiIndex::new(|_, d: &Token| d.owner.clone(), TOKENS_PK, "tokens__owner"),
         };
 
         Self {
-            contract_info: Item::new("contract_info_key"),
-            minter: Item::new("minter_key"),
-            owner: Item::new("owner_key"),
-            tokens: IndexedMap::new("tokens_key", indexes),
+            contract_info: Item::new("contract_info"),
+            minter: Item::new("minter"),
+            owner: Item::new("owner"),
+            tokens: IndexedMap::new(TOKENS_PK, indexes),
         }
     }
-}
-
-pub fn idx_fn(_v: &[u8], token: &Token) -> Addr {
-    return token.owner.clone();
 }

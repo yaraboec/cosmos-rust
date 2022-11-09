@@ -1,6 +1,5 @@
 ---
 source: src/execute.rs
-assertion_line: 254
 expression: "contract.tokens.load(&deps.storage, TOKEN_ID).unwrap()"
 ---
 {

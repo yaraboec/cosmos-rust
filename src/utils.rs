@@ -1,10 +1,14 @@
 pub mod test_utils {
     use cosmwasm_std::{
         testing::{mock_dependencies, mock_env, mock_info, MockApi, MockQuerier},
-        Env, MemoryStorage, OwnedDeps, Response, MessageInfo,
+        Env, MemoryStorage, MessageInfo, OwnedDeps, Response,
     };
 
-    use crate::{msg::{InstantiateMsg, ExecuteMsg, TokenMsg}, state::Contract, ContractError};
+    use crate::{
+        msg::{ExecuteMsg, InstantiateMsg, TokenMsg},
+        state::Contract,
+        ContractError,
+    };
 
     pub const MINTER: &str = "minter";
     pub const NAME: &str = "my_contract";
@@ -12,7 +16,7 @@ pub mod test_utils {
     pub const OWNER: &str = "owner";
     pub const TOKEN_ID: &str = "1";
 
-    pub fn initialized_contract() -> (
+    pub fn initialize_contract() -> (
         OwnedDeps<MemoryStorage, MockApi, MockQuerier>,
         Contract<'static>,
         Env,

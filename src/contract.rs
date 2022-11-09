@@ -41,12 +41,12 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
 mod tests {
     use crate::{
         response::ContractInfoResponse,
-        utils::test_utils::{initialized_contract, MINTER, NAME, OWNER, SYMBOL},
+        utils::test_utils::{initialize_contract, MINTER, NAME, OWNER, SYMBOL},
     };
 
     #[test]
     fn should_initialize_contract_and_set_initial_state() {
-        let (deps, contract, .., init_result) = initialized_contract();
+        let (deps, contract, .., init_result) = initialize_contract();
 
         assert_eq!(init_result.messages.len(), 0);
         assert_eq!(contract.minter.load(&deps.storage).unwrap(), MINTER);
