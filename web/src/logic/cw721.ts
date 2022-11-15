@@ -24,7 +24,10 @@ export class Cw721Contract {
         minter: senderAddress,
       },
       Math.random().toString(20).substring(2, 6),
-      "auto"
+      {
+        gas: "200000",
+        amount: [{ denom: "umlg", amount: "5000" }],
+      }
     );
 
     return contractAddress;
@@ -58,7 +61,10 @@ export class Cw721Contract {
           },
         },
       },
-      "auto"
+      {
+        gas: "200000",
+        amount: [{ denom: "umlg", amount: "10000" }],
+      }
     );
 
     return mintRes.transactionHash;
@@ -78,7 +84,10 @@ export class Cw721Contract {
           to: receiver,
         },
       },
-      "auto"
+      {
+        gas: "200000",
+        amount: [{ denom: "umlg", amount: "5000" }],
+      }
     );
 
     return transferRes.transactionHash;
