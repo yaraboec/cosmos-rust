@@ -1,3 +1,4 @@
+#[cfg(test)]
 pub mod test_utils {
     use cosmwasm_std::{
         testing::{mock_dependencies, mock_env, mock_info, MockApi, MockQuerier},

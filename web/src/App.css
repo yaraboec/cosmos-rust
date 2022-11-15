@@ -1,0 +1,11 @@
+.manage {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 50px;
+}
+
+input {
+  width: 600px;
+}

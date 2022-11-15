@@ -1,0 +1,1 @@
+ac8300f3e470b3cf5eb8873b95294f8e1d4d4e956ac1963e78d74f98527bcd82  ./target/wasm32-unknown-unknown/release/cosmos_rust.wasm
