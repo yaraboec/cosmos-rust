@@ -1,6 +1,8 @@
 use cosmwasm_schema::{cw_serde, QueryResponses};
 use cosmwasm_std::{Binary, Coin};
 
+use crate::state::Sale;
+
 #[cw_serde]
 pub struct InstantiateMsg {}
 
@@ -34,5 +36,13 @@ pub struct TransferMsg {
 }
 
 #[cw_serde]
+pub struct SalesResponse {
+    pub sales: Vec<Sale>
+}
+
+#[cw_serde]
 #[derive(QueryResponses)]
-pub enum QueryMsg {}
+pub enum QueryMsg {
+    #[returns(SalesResponse)]
+    Sales {}
+}

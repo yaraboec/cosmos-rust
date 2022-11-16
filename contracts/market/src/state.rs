@@ -1,10 +1,11 @@
 use cosmwasm_std::{Addr, Coin};
-use cw_storage_plus::{Index, IndexList, IndexedMap, MultiIndex, Item};
+use cw_storage_plus::{Index, IndexList, IndexedMap, Item, MultiIndex};
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 const SALES_PK: &str = "sales";
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, JsonSchema)]
 pub struct Sale {
     pub token_id: String,
     pub owner: Addr,

@@ -32,7 +32,9 @@ pub fn execute(
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn query(_deps: Deps, _env: Env, _msg: QueryMsg) -> StdResult<Binary> {
-    unimplemented!();
+    let contract = Contract::get_contract();
+
+    contract.query(_deps, _env, _msg)
 }
 
 #[cfg(test)]

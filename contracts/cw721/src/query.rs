@@ -91,7 +91,6 @@ impl<'a> Contract<'a> {
             .tokens
             .range(deps.storage, start, None, Order::Ascending)
             .take(limit)
-            .take(limit)
             .map(|token| token.map(|(_, token)| token))
             .collect();
 
