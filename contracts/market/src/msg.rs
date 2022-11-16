@@ -30,9 +30,11 @@ pub enum ExecuteMsg {
 }
 
 #[cw_serde]
-pub struct TransferMsg {
-    pub to: String,
-    pub token_id: String,
+pub enum ExecuteMsgCw721 {
+    TransferNft {
+        to: String,
+        token_id: String,
+    }
 }
 
 #[cw_serde]

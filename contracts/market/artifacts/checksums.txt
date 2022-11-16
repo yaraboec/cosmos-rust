@@ -1,0 +1,1 @@
+b0bd4ebdd1818ab9cac3269cd28504c9c061a06e6f17117a717dbed9d9690933  market.wasm

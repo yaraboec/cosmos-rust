@@ -5,7 +5,7 @@ use cosmwasm_std::{
 use cw2::set_contract_version;
 
 use crate::{
-    msg::{Cw721ReceiveMsg, ExecuteMsg, InstantiateMsg, SaleData, TransferMsg},
+    msg::{Cw721ReceiveMsg, ExecuteMsg, InstantiateMsg, SaleData, ExecuteMsgCw721},
     state::{Contract, Sale},
     ContractError,
 };
@@ -62,7 +62,7 @@ impl<'a> Contract<'a> {
         };
 
         self.sales
-            .update(_deps.storage, &_msg.sender.clone(), |old| match old {
+            .update(_deps.storage, &_msg.token_id, |old| match old {
                 Some(_) => Err(ContractError::AlreadyExists {}),
                 None => Ok(sale),
             })?;
@@ -125,7 +125,7 @@ impl<'a> Contract<'a> {
         }
         .into();
 
-        let transfer = TransferMsg {
+        let transfer = ExecuteMsgCw721::TransferNft {
             to: _info.sender.clone().into_string(),
             token_id: token_id.clone(),
         };
