@@ -14,4 +14,7 @@ pub enum ContractError {
 
     #[error("InvalidDeposit")]
     InvalidDeposit {},
+
+    #[error("InvalidReply")]
+    InvalidReply {},
 }

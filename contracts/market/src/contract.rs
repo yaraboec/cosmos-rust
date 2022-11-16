@@ -1,6 +1,6 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
-use cosmwasm_std::{Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
+use cosmwasm_std::{Binary, Deps, DepsMut, Env, MessageInfo, Reply, Response, StdResult};
 
 use crate::error::ContractError;
 use crate::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
@@ -35,6 +35,13 @@ pub fn query(_deps: Deps, _env: Env, _msg: QueryMsg) -> StdResult<Binary> {
     let contract = Contract::get_contract();
 
     contract.query(_deps, _env, _msg)
+}
+
+#[cfg_attr(not(feature = "library"), entry_point)]
+pub fn reply(_deps: Deps, _env: Env, _reply: Reply) -> Result<Response, ContractError> {
+    let contract = Contract::get_contract();
+
+    contract.reply(_deps, _env, _reply)
 }
 
 #[cfg(test)]

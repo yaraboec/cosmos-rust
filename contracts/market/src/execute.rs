@@ -1,17 +1,20 @@
 use cosmwasm_std::{
-    from_binary, to_binary, BankMsg, CosmosMsg, DepsMut, Env, MessageInfo, Response, StdResult,
-    WasmMsg,
+    from_binary, to_binary, BankMsg, CosmosMsg, Deps, DepsMut, Env, MessageInfo,
+    Reply, Response, StdResult, SubMsg, WasmMsg,
 };
 use cw2::set_contract_version;
 
 use crate::{
-    msg::{Cw721ReceiveMsg, ExecuteMsg, InstantiateMsg, SaleData, ExecuteMsgCw721},
-    state::{Contract, Sale},
+    msg::{
+        Cw721ReceiveMsg, ExecuteMsg, ExecuteMsgCw721, InstantiateMsg, ReceiveLazyNftMsg, SaleData,
+    },
+    state::{Contract, LazyNft, Sale},
     ContractError,
 };
 
 const CONTRACT_NAME: &str = "contract";
 const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
+const MINT_RESPONSE_ID: u64 = 1;
 
 impl<'a> Contract<'a> {
     pub fn instantiate(
@@ -40,8 +43,12 @@ impl<'a> Contract<'a> {
     ) -> Result<Response, ContractError> {
         match _msg {
             ExecuteMsg::ReceiveNft(msg) => self.receive_nft(_deps, _env, _info, msg),
+            ExecuteMsg::ReceiveLazyNft(msg) => self.receive_lazy_nft(_deps, _env, _info, msg),
             ExecuteMsg::RemoveSale { token_id } => self.remove_sale(_deps, _env, _info, token_id),
             ExecuteMsg::Purchase { token_id } => self.purchase(_deps, _env, _info, token_id),
+            ExecuteMsg::PurchaseLazy { token_id } => {
+                self.purchase_lazy(_deps, _env, _info, token_id)
+            }
         }
     }
 
@@ -73,6 +80,27 @@ impl<'a> Contract<'a> {
             .add_attribute("owner", _msg.sender)
             .add_attribute("buy_token", data.price.denom)
             .add_attribute("buy_price", data.price.amount))
+    }
+
+    pub fn receive_lazy_nft(
+        &self,
+        _deps: DepsMut,
+        _env: Env,
+        _info: MessageInfo,
+        _msg: ReceiveLazyNftMsg,
+    ) -> Result<Response, ContractError> {
+        let lazy_nft = LazyNft {
+            contract: _deps.api.addr_validate(&_msg.contract)?,
+            token_id: _msg.token_id.clone(),
+        };
+
+        self.lazy_sales
+            .update(_deps.storage, &_msg.token_id, |old| match old {
+                Some(_) => Err(ContractError::AlreadyExists {}),
+                None => Ok(lazy_nft),
+            })?;
+
+        Ok(Response::default())
     }
 
     pub fn remove_sale(
@@ -143,5 +171,71 @@ impl<'a> Contract<'a> {
             .add_attribute("token_id", token_id)
             .add_attribute("buy_token", coin.denom)
             .add_attribute("buy_price", coin.amount))
+    }
+
+    pub fn purchase_lazy(
+        &self,
+        _deps: DepsMut,
+        _env: Env,
+        _info: MessageInfo,
+        token_id: String,
+    ) -> Result<Response, ContractError> {
+        let lazy_nft = self.lazy_sales.load(_deps.storage, &token_id)?;
+
+        let mint = ExecuteMsgCw721::Mint {
+            token_id: token_id.clone(),
+            owner: _info.sender.into_string(),
+            token_uri: None,
+        };
+        let mint_msg: CosmosMsg = WasmMsg::Execute {
+            contract_addr: lazy_nft.contract.into_string(),
+            msg: to_binary(&mint)?,
+            funds: vec![],
+        }
+        .into();
+
+        Ok(Response::new()
+            .add_attribute("action", "lazy_mint")
+            .add_submessage(SubMsg {
+                gas_limit: None,
+                id: MINT_RESPONSE_ID,
+                msg: mint_msg,
+                reply_on: cosmwasm_std::ReplyOn::Always,
+            }))
+    }
+}
+
+impl<'a> Contract<'a> {
+    pub fn reply(&self, _deps: Deps, _env: Env, _reply: Reply) -> Result<Response, ContractError> {
+        match _reply.id {
+            MINT_RESPONSE_ID => self.mint_reply(_deps, _env, _reply),
+            _ => Err(ContractError::InvalidReply {}),
+        }
+    }
+
+    pub fn mint_reply(
+        &self,
+        _deps: Deps,
+        _env: Env,
+        _reply: Reply,
+    ) -> Result<Response, ContractError> {
+        let res = _reply.result.into_result();
+        let msg = match res {
+            Ok(msg) => msg,
+            Err(_) => return Err(ContractError::InvalidReply {}),
+        };
+
+        let mint_event = msg
+            .events
+            .iter()
+            .find(|event| {
+                event
+                    .attributes
+                    .iter()
+                    .any(|attr| attr.key == "action" && attr.value == "mint")
+            })
+            .ok_or_else(|| ContractError::InvalidReply {})?;
+
+        Ok(Response::new().add_attributes(mint_event.attributes.clone()))
     }
 }

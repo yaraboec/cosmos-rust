@@ -14,19 +14,23 @@ pub struct Cw721ReceiveMsg {
 }
 
 #[cw_serde]
+pub struct ReceiveLazyNftMsg {
+    pub token_id: String,
+    pub contract: String,
+}
+
+#[cw_serde]
 pub struct SaleData {
-    pub price: Coin
+    pub price: Coin,
 }
 
 #[cw_serde]
 pub enum ExecuteMsg {
     ReceiveNft(Cw721ReceiveMsg),
-    Purchase {
-        token_id: String,
-    },
-    RemoveSale {
-        token_id: String
-    }
+    ReceiveLazyNft(ReceiveLazyNftMsg),
+    Purchase { token_id: String },
+    PurchaseLazy { token_id: String },
+    RemoveSale { token_id: String },
 }
 
 #[cw_serde]
@@ -34,17 +38,22 @@ pub enum ExecuteMsgCw721 {
     TransferNft {
         to: String,
         token_id: String,
-    }
+    },
+    Mint {
+        token_id: String,
+        owner: String,
+        token_uri: Option<String>,
+    },
 }
 
 #[cw_serde]
 pub struct SalesResponse {
-    pub sales: Vec<Sale>
+    pub sales: Vec<Sale>,
 }
 
 #[cw_serde]
 #[derive(QueryResponses)]
 pub enum QueryMsg {
     #[returns(SalesResponse)]
-    Sales {}
+    Sales {},
 }
