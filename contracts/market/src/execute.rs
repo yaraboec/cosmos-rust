@@ -190,17 +190,14 @@ impl<'a> Contract<'a> {
                 token_uri: None,
             },
         };
-        let mint_msg = SubMsg {
-            msg: WasmMsg::Execute {
+        let mint_msg = SubMsg::reply_on_success(
+            WasmMsg::Execute {
                 contract_addr: lazy_nft.contract.into_string(),
                 msg: to_binary(&mint)?,
                 funds: vec![],
-            }
-            .into(),
-            id: MINT_RESPONSE_ID,
-            gas_limit: None,
-            reply_on: cosmwasm_std::ReplyOn::Always,
-        };
+            },
+            MINT_RESPONSE_ID,
+        );
 
         Ok(Response::new().add_submessage(mint_msg))
     }
