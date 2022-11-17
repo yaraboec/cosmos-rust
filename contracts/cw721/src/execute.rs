@@ -76,11 +76,11 @@ impl<'a> Contract<'a> {
                 None => Ok(token),
             })?;
 
-        return Ok(Response::new()
+        Ok(Response::new()
             .add_attribute("action", "mint")
             .add_attribute("token_id", msg.token_id)
             .add_attribute("owner", msg.owner)
-            .add_attribute("token_uri", msg.token_uri.unwrap_or("zxc".to_string())));
+            .add_attribute("token_uri", msg.token_uri.unwrap_or("zxc".to_string())))
     }
 
     pub fn send_nft(

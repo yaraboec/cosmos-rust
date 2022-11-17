@@ -40,10 +40,15 @@ pub enum ExecuteMsgCw721 {
         token_id: String,
     },
     Mint {
-        token_id: String,
-        owner: String,
-        token_uri: Option<String>,
+        token: TokenMsg
     },
+}
+
+#[cw_serde]
+pub struct TokenMsg {
+    pub owner: String,
+    pub token_id: String,
+    pub token_uri: Option<String>,
 }
 
 #[cw_serde]

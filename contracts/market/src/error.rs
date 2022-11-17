@@ -16,5 +16,7 @@ pub enum ContractError {
     InvalidDeposit {},
 
     #[error("InvalidReply")]
-    InvalidReply {},
+    InvalidReply {
+        msg: Option<String>
+    },
 }

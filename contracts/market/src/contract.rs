@@ -38,7 +38,7 @@ pub fn query(_deps: Deps, _env: Env, _msg: QueryMsg) -> StdResult<Binary> {
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
-pub fn reply(_deps: Deps, _env: Env, _reply: Reply) -> Result<Response, ContractError> {
+pub fn reply(_deps: DepsMut, _env: Env, _reply: Reply) -> StdResult<Response> {
     let contract = Contract::get_contract();
 
     contract.reply(_deps, _env, _reply)

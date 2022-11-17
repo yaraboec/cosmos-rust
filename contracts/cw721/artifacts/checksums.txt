@@ -1,1 +1,1 @@
-713217fbd7783e108fefd903c1612e0129b2b6fe4d0342a9ec89bbaae6383e48  cosmos_rust.wasm
+17dfe60f7bb61bc5984267bf79f420ec1e69f06d1bf262591d79616ccdbc79d8  cosmos_rust.wasm

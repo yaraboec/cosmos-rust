@@ -1,12 +1,13 @@
 use cosmwasm_std::{
-    from_binary, to_binary, BankMsg, CosmosMsg, Deps, DepsMut, Env, MessageInfo,
-    Reply, Response, StdResult, SubMsg, WasmMsg,
+    from_binary, to_binary, BankMsg, CosmosMsg, DepsMut, Env, MessageInfo, Reply, Response,
+    StdError, StdResult, SubMsg, SubMsgResponse, WasmMsg,
 };
 use cw2::set_contract_version;
 
 use crate::{
     msg::{
         Cw721ReceiveMsg, ExecuteMsg, ExecuteMsgCw721, InstantiateMsg, ReceiveLazyNftMsg, SaleData,
+        TokenMsg,
     },
     state::{Contract, LazyNft, Sale},
     ContractError,
@@ -183,49 +184,40 @@ impl<'a> Contract<'a> {
         let lazy_nft = self.lazy_sales.load(_deps.storage, &token_id)?;
 
         let mint = ExecuteMsgCw721::Mint {
-            token_id: token_id.clone(),
-            owner: _info.sender.into_string(),
-            token_uri: None,
+            token: TokenMsg {
+                owner: _info.sender.into_string(),
+                token_id: token_id.clone(),
+                token_uri: None,
+            },
         };
-        let mint_msg: CosmosMsg = WasmMsg::Execute {
-            contract_addr: lazy_nft.contract.into_string(),
-            msg: to_binary(&mint)?,
-            funds: vec![],
-        }
-        .into();
+        let mint_msg = SubMsg {
+            msg: WasmMsg::Execute {
+                contract_addr: lazy_nft.contract.into_string(),
+                msg: to_binary(&mint)?,
+                funds: vec![],
+            }
+            .into(),
+            id: MINT_RESPONSE_ID,
+            gas_limit: None,
+            reply_on: cosmwasm_std::ReplyOn::Always,
+        };
 
-        Ok(Response::new()
-            .add_attribute("action", "lazy_mint")
-            .add_submessage(SubMsg {
-                gas_limit: None,
-                id: MINT_RESPONSE_ID,
-                msg: mint_msg,
-                reply_on: cosmwasm_std::ReplyOn::Always,
-            }))
+        Ok(Response::new().add_submessage(mint_msg))
     }
 }
 
 impl<'a> Contract<'a> {
-    pub fn reply(&self, _deps: Deps, _env: Env, _reply: Reply) -> Result<Response, ContractError> {
+    pub fn reply(&self, _deps: DepsMut, _env: Env, _reply: Reply) -> StdResult<Response> {
         match _reply.id {
             MINT_RESPONSE_ID => self.mint_reply(_deps, _env, _reply),
-            _ => Err(ContractError::InvalidReply {}),
+            _ => Err(StdError::generic_err("wrong id")),
         }
     }
 
-    pub fn mint_reply(
-        &self,
-        _deps: Deps,
-        _env: Env,
-        _reply: Reply,
-    ) -> Result<Response, ContractError> {
-        let res = _reply.result.into_result();
-        let msg = match res {
-            Ok(msg) => msg,
-            Err(_) => return Err(ContractError::InvalidReply {}),
-        };
+    pub fn mint_reply(&self, _deps: DepsMut, _env: Env, _reply: Reply) -> StdResult<Response> {
+        let res: SubMsgResponse = _reply.result.into_result().map_err(StdError::generic_err)?;
 
-        let mint_event = msg
+        let mint_event = res
             .events
             .iter()
             .find(|event| {
@@ -234,8 +226,15 @@ impl<'a> Contract<'a> {
                     .iter()
                     .any(|attr| attr.key == "action" && attr.value == "mint")
             })
-            .ok_or_else(|| ContractError::InvalidReply {})?;
+            .ok_or_else(|| StdError::generic_err("wrong event"))?;
 
-        Ok(Response::new().add_attributes(mint_event.attributes.clone()))
+        let minted_token_attr = mint_event
+            .attributes
+            .iter()
+            .cloned()
+            .find(|attr| attr.key == "token_id")
+            .ok_or_else(|| StdError::generic_err("no token_id"))?;
+
+        Ok(Response::new().add_attribute(minted_token_attr.key, minted_token_attr.value))
     }
 }
