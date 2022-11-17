@@ -20,6 +20,11 @@ pub struct LazyNft {
     pub contract: Addr,
 }
 
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, JsonSchema)]
+pub struct Temp {
+    pub funds: Coin
+}
+
 pub struct Contract<'a> {
     pub owner: Item<'a, Addr>,
     pub sales: IndexedMap<'a, &'a str, Sale, SaleIndex<'a>>,
@@ -68,3 +73,5 @@ impl<'a> Contract<'a> {
         }
     }
 }
+
+pub const TEMP: Item<Temp> = Item::new("temp");

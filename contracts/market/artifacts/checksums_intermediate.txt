@@ -1,1 +1,1 @@
-7c6bd06167699eaac36640d6bca669d18fc90d6ff16516cb19e38a03c1ae0fe2  ./target/wasm32-unknown-unknown/release/market.wasm
+ff5c86c64be3667a7b0c5d1de0ffc9e9cb245fcb12dc634155fccbfa9f6414a5  ./target/wasm32-unknown-unknown/release/market.wasm

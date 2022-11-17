@@ -9,7 +9,7 @@ use crate::{
         Cw721ReceiveMsg, ExecuteMsg, ExecuteMsgCw721, InstantiateMsg, ReceiveLazyNftMsg, SaleData,
         TokenMsg,
     },
-    state::{Contract, LazyNft, Sale},
+    state::{Contract, LazyNft, Sale, TEMP, Temp},
     ContractError,
 };
 
@@ -199,6 +199,11 @@ impl<'a> Contract<'a> {
             MINT_RESPONSE_ID,
         );
 
+        let temp = Temp {
+            funds: _info.funds.into_iter().find(|coin| coin.denom == "umlg").unwrap()
+        };
+        TEMP.save(_deps.storage, &temp)?;
+
         Ok(Response::new().add_submessage(mint_msg))
     }
 }
@@ -231,7 +236,12 @@ impl<'a> Contract<'a> {
             .cloned()
             .find(|attr| attr.key == "token_id")
             .ok_or_else(|| StdError::generic_err("no token_id"))?;
+            
+        let temp = TEMP.load(_deps.storage)?;
+        TEMP.remove(_deps.storage);
 
-        Ok(Response::new().add_attribute(minted_token_attr.key, minted_token_attr.value))
+        let funds = format!("{}:{}",temp.funds.denom, temp.funds.amount);
+
+        Ok(Response::new().add_attribute(minted_token_attr.key, minted_token_attr.value).add_attribute("attached_funds", funds))
     }
 }
