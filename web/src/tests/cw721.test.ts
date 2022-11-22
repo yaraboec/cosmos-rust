@@ -47,7 +47,6 @@ describe("cw721", () => {
       expect.any(String),
       DEFAULT_FUNDS
     );
-    expect(signingClient.instantiate).toHaveReturnedWith(returnValue);
     expect(initSpy).toHaveBeenCalled();
     expect(initSpy).toHaveBeenCalledWith(MINTER, signingClient, codeId);
     expect(initRes).toEqual((await returnValue).contractAddress);
@@ -70,7 +69,6 @@ describe("cw721", () => {
       },
       DEFAULT_FUNDS
     );
-    expect(signingClient.execute).toHaveReturnedWith(RETURNED_CALL_RESULT);
     expect(mintSpy).toHaveBeenCalled();
     expect(mintSpy).toHaveBeenCalledWith(MINTER, RECEIVER, TOKEN_ID, TOKEN_URI);
     expect(mintTx).toEqual((await RETURNED_CALL_RESULT).transactionHash);
@@ -94,7 +92,6 @@ describe("cw721", () => {
       },
       DEFAULT_FUNDS
     );
-    expect(signingClient.execute).toHaveReturnedWith(RETURNED_CALL_RESULT);
     expect(transferSpy).toHaveBeenCalled();
     expect(transferSpy).toHaveBeenCalledWith(MINTER, TOKEN_ID, RECEIVER);
     expect(transferTx).toEqual((await RETURNED_CALL_RESULT).transactionHash);
@@ -114,7 +111,6 @@ describe("cw721", () => {
     expect(signingClient.queryContractSmart).toHaveBeenCalledWith(CONTRACT, {
       tokens: { owner: MINTER },
     });
-    expect(signingClient.queryContractSmart).toHaveReturnedWith(returnValue);
     expect(getTokensSpy).toHaveBeenCalled();
     expect(getTokensSpy).toHaveBeenCalledWith(MINTER);
     expect(tokens).toEqual(await returnValue);
