@@ -14,6 +14,10 @@ const MINTER = "minter";
 const TOKEN_URI = "ipfs12345";
 const CONTRACT = "wasm12345";
 const RETURNED_HASH = { transactionHash: "123" };
+const DEFAULT_FUNDS = {
+  amount: [{ amount: expect.any(String), denom: expect.any(String) }],
+  gas: expect.any(String),
+};
 
 describe("cw721", () => {
   const cw721 = new Cw721Contract(
@@ -39,10 +43,7 @@ describe("cw721", () => {
       codeId,
       { minter: MINTER, name: expect.any(String), symbol: expect.any(String) },
       expect.any(String),
-      {
-        amount: [{ amount: expect.any(String), denom: expect.any(String) }],
-        gas: expect.any(String),
-      }
+      DEFAULT_FUNDS
     );
     expect(signingClient.instantiate).toHaveReturnedWith(returnValue);
     expect(initSpy).toHaveBeenCalled();
@@ -63,10 +64,7 @@ describe("cw721", () => {
           token: { owner: RECEIVER, token_id: TOKEN_ID, token_uri: TOKEN_URI },
         },
       },
-      {
-        amount: [{ amount: expect.any(String), denom: expect.any(String) }],
-        gas: expect.any(String),
-      }
+      DEFAULT_FUNDS
     );
     expect(signingClient.execute).toHaveReturnedWith(RETURNED_HASH);
   });
@@ -86,10 +84,7 @@ describe("cw721", () => {
           token_id: TOKEN_ID,
         },
       },
-      {
-        amount: [{ amount: expect.any(String), denom: expect.any(String) }],
-        gas: expect.any(String),
-      }
+      DEFAULT_FUNDS
     );
     expect(signingClient.execute).toHaveReturnedWith(RETURNED_HASH);
   });
