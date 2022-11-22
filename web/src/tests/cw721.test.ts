@@ -13,7 +13,9 @@ const TOKEN_ID = "1";
 const MINTER = "minter";
 const TOKEN_URI = "ipfs12345";
 const CONTRACT = "wasm12345";
-const RETURNED_HASH = { transactionHash: "123" };
+const RETURNED_CALL_RESULT = Promise.resolve({
+  transactionHash: "123",
+});
 const DEFAULT_FUNDS = {
   amount: [{ amount: expect.any(String), denom: expect.any(String) }],
   gas: expect.any(String),
@@ -27,11 +29,11 @@ describe("cw721", () => {
 
   it("should proceed instantiation", async () => {
     const codeId = 123;
-    const returnValue = { contractAddress: "address" };
+    const returnValue = Promise.resolve({ contractAddress: "address" });
     const initSpy = jest.spyOn(Cw721Contract, "instantiate");
     signingClient.instantiate.mockReturnValue(returnValue);
 
-    Cw721Contract.instantiate(
+    const initRes = await Cw721Contract.instantiate(
       MINTER,
       signingClient as unknown as SigningCosmWasmClient,
       codeId
@@ -48,12 +50,14 @@ describe("cw721", () => {
     expect(signingClient.instantiate).toHaveReturnedWith(returnValue);
     expect(initSpy).toHaveBeenCalled();
     expect(initSpy).toHaveBeenCalledWith(MINTER, signingClient, codeId);
+    expect(initRes).toEqual((await returnValue).contractAddress);
   });
 
   it("should proceed minting", async () => {
-    signingClient.execute.mockReturnValue(RETURNED_HASH);
+    const mintSpy = jest.spyOn(cw721, "mintToken");
+    signingClient.execute.mockReturnValue(RETURNED_CALL_RESULT);
 
-    cw721.mintToken(MINTER, RECEIVER, TOKEN_ID, TOKEN_URI);
+    const mintTx = await cw721.mintToken(MINTER, RECEIVER, TOKEN_ID, TOKEN_URI);
 
     expect(signingClient.execute).toHaveBeenCalled();
     expect(signingClient.execute).toHaveBeenCalledWith(
@@ -66,13 +70,17 @@ describe("cw721", () => {
       },
       DEFAULT_FUNDS
     );
-    expect(signingClient.execute).toHaveReturnedWith(RETURNED_HASH);
+    expect(signingClient.execute).toHaveReturnedWith(RETURNED_CALL_RESULT);
+    expect(mintSpy).toHaveBeenCalled();
+    expect(mintSpy).toHaveBeenCalledWith(MINTER, RECEIVER, TOKEN_ID, TOKEN_URI);
+    expect(mintTx).toEqual((await RETURNED_CALL_RESULT).transactionHash);
   });
 
   it("should proceed transferring", async () => {
-    signingClient.execute.mockReturnValue(RETURNED_HASH);
+    const transferSpy = jest.spyOn(cw721, "transferToken");
+    signingClient.execute.mockReturnValue(RETURNED_CALL_RESULT);
 
-    cw721.transferToken(MINTER, TOKEN_ID, RECEIVER);
+    const transferTx = await cw721.transferToken(MINTER, TOKEN_ID, RECEIVER);
 
     expect(signingClient.execute).toHaveBeenCalled();
     expect(signingClient.execute).toHaveBeenCalledWith(
@@ -86,22 +94,29 @@ describe("cw721", () => {
       },
       DEFAULT_FUNDS
     );
-    expect(signingClient.execute).toHaveReturnedWith(RETURNED_HASH);
+    expect(signingClient.execute).toHaveReturnedWith(RETURNED_CALL_RESULT);
+    expect(transferSpy).toHaveBeenCalled();
+    expect(transferSpy).toHaveBeenCalledWith(MINTER, TOKEN_ID, RECEIVER);
+    expect(transferTx).toEqual((await RETURNED_CALL_RESULT).transactionHash);
   });
 
   it("should proceed querying tokens", async () => {
-    const returnValue: Token[] = [
+    const getTokensSpy = jest.spyOn(cw721, "getOwnedTokens");
+    const returnValue: Promise<Token[]> = Promise.resolve([
       { owner: MINTER, token_id: TOKEN_ID, token_uri: TOKEN_URI },
       { owner: MINTER, token_id: "2", token_uri: "ipfs54321" },
-    ];
+    ]);
     signingClient.queryContractSmart.mockReturnValue(returnValue);
 
-    cw721.getOwnedTokens(MINTER);
+    const tokens = await cw721.getOwnedTokens(MINTER);
 
     expect(signingClient.queryContractSmart).toHaveBeenCalled();
     expect(signingClient.queryContractSmart).toHaveBeenCalledWith(CONTRACT, {
       tokens: { owner: MINTER },
     });
     expect(signingClient.queryContractSmart).toHaveReturnedWith(returnValue);
+    expect(getTokensSpy).toHaveBeenCalled();
+    expect(getTokensSpy).toHaveBeenCalledWith(MINTER);
+    expect(tokens).toEqual(await returnValue);
   });
 });
