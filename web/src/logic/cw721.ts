@@ -49,7 +49,7 @@ export class Cw721Contract {
     tokenUri?: string
   ): Promise<string> {
     console.log(senderAddress, owner, this.contractAddress);
-    const mintRes = await this.signingClient.execute(
+    const { transactionHash } = await this.signingClient.execute(
       senderAddress,
       this.contractAddress,
       {
@@ -67,7 +67,7 @@ export class Cw721Contract {
       }
     );
 
-    return mintRes.transactionHash;
+    return transactionHash;
   }
 
   async transferToken(
@@ -75,7 +75,7 @@ export class Cw721Contract {
     tokenId: string,
     receiver: string
   ): Promise<string> {
-    const transferRes = await this.signingClient.execute(
+    const { transactionHash } = await this.signingClient.execute(
       senderAddress,
       this.contractAddress,
       {
@@ -90,6 +90,6 @@ export class Cw721Contract {
       }
     );
 
-    return transferRes.transactionHash;
+    return transactionHash;
   }
 }
