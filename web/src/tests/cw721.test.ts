@@ -2,23 +2,23 @@ import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { Token } from "../logic/types";
 import { Cw721Contract } from "./../logic/cw721";
 
-const signingClientMock = {
-  instantiate: jest.fn(),
-  execute: jest.fn(),
-  queryContractSmart: jest.fn(),
-};
-
 const RECEIVER = "receiver";
 const TOKEN_ID = "1";
 const MINTER = "minter";
 const TOKEN_URI = "ipfs12345";
 const CONTRACT_ADDRESS = "wasm12345";
-const RETURNED_CALL_RESULT = {
+const EXECUTE_RESULT = {
   transactionHash: "ABC123",
 };
 const DEFAULT_FUNDS = {
   amount: [{ amount: expect.any(String), denom: expect.any(String) }],
   gas: expect.any(String),
+};
+
+const signingClientMock = {
+  instantiate: jest.fn(),
+  execute: jest.fn().mockResolvedValue(EXECUTE_RESULT),
+  queryContractSmart: jest.fn(),
 };
 
 describe("cw721", () => {
@@ -50,8 +50,6 @@ describe("cw721", () => {
   });
 
   it("should proceed minting", async () => {
-    signingClientMock.execute.mockResolvedValue(RETURNED_CALL_RESULT);
-
     const mintTx = await cw721.mintToken(MINTER, RECEIVER, TOKEN_ID, TOKEN_URI);
 
     expect(signingClientMock.execute).toHaveBeenCalledWith(
@@ -64,12 +62,10 @@ describe("cw721", () => {
       },
       DEFAULT_FUNDS
     );
-    expect(mintTx).toEqual(RETURNED_CALL_RESULT.transactionHash);
+    expect(mintTx).toEqual(EXECUTE_RESULT.transactionHash);
   });
 
   it("should proceed transferring", async () => {
-    signingClientMock.execute.mockResolvedValue(RETURNED_CALL_RESULT);
-
     const transferTx = await cw721.transferToken(MINTER, TOKEN_ID, RECEIVER);
 
     expect(signingClientMock.execute).toHaveBeenCalledWith(
@@ -83,7 +79,7 @@ describe("cw721", () => {
       },
       DEFAULT_FUNDS
     );
-    expect(transferTx).toEqual(RETURNED_CALL_RESULT.transactionHash);
+    expect(transferTx).toEqual(EXECUTE_RESULT.transactionHash);
   });
 
   it("should proceed querying tokens", async () => {
